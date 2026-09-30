@@ -1,0 +1,2 @@
+D:/Study/Mobile/CrossPlatform/dice/android/app/.cxx/Debug/6i1v2l2j/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/Study/Mobile/CrossPlatform/dice/android/app/.cxx/Debug/6i1v2l2j/armeabi-v7a/CMakeFiles/rebuild_cache.dir
