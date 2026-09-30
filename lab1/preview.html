@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 1: I Am Rich - Live Flutter Web Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 50% 20%, #1a2228 0%, #0d1117 100%);
+      --flutter-bluegrey-900: #263238;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #e53935;
+      --accent-glow: rgba(229, 57, 53, 0.35);
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+      max-width: 800px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(2, 125, 253, 0.15);
+      border: 1px solid rgba(2, 125, 253, 0.3);
+      color: #64b5f6;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff 40%, #90caf9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .container {
+      display: flex;
+      gap: 36px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    /* Device Mockup */
+    .device-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .phone-frame {
+      width: 340px;
+      height: 680px;
+      background: #111418;
+      border-radius: 46px;
+      padding: 12px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8),
+                  0 0 0 2px rgba(255, 255, 255, 0.1),
+                  inset 0 0 0 3px #1f242c;
+      position: relative;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background-color: var(--flutter-bluegrey-900);
+      border-radius: 36px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      user-select: none;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      height: 40px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #cfd8dc;
+      z-index: 10;
+    }
+
+    .island-notch {
+      width: 90px;
+      height: 22px;
+      background: #000;
+      border-radius: 12px;
+      position: absolute;
+      top: 9px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Flutter AppBar */
+    .flutter-appbar {
+      height: 56px;
+      background-color: var(--flutter-bluegrey-900);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      z-index: 5;
+    }
+
+    .flutter-appbar h2 {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #ffffff;
+      letter-spacing: 0.2px;
+    }
+
+    /* Flutter Body */
+    .flutter-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-color: var(--flutter-bluegrey-900);
+      position: relative;
+    }
+
+    .diamond-image-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+    }
+
+    .diamond-image-container:hover {
+      transform: scale(1.06);
+    }
+
+    .diamond-glow {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      filter: blur(20px);
+      z-index: 1;
+      animation: pulse 3s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    .diamond-img {
+      max-width: 240px;
+      max-height: 240px;
+      object-fit: contain;
+      position: relative;
+      z-index: 2;
+      filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.5));
+    }
+
+    /* Home Indicator */
+    .home-indicator {
+      width: 120px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 999px;
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Side Panel */
+    .side-panel {
+      flex: 1;
+      min-width: 320px;
+      max-width: 580px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(12px);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #90caf9;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-box {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #e6edf3;
+      overflow-x: auto;
+    }
+
+    .keyword { color: #ff7b72; }
+    .type { color: #79c0ff; }
+    .string { color: #a5d6ff; }
+    .property { color: #d2a8ff; }
+    .comment { color: #8b949e; font-style: italic; }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: #0288d1;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #0277bd;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f0f6fc;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .notice {
+      background: rgba(255, 179, 0, 0.1);
+      border-left: 4px solid #ffb300;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #ffe082;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14.314 0L2.3 12 6 15.7 21.684.013h-7.37zm.014 11.072L7.857 17.53 14.329 24H21.7l-7.36-7.357 5.86-5.571h-5.872z"/></svg>
+      Flutter Multi-Platform Lab 1
+    </div>
+    <h1>Lab 1: I Am Rich</h1>
+    <p class="subtitle">Mô phỏng giao diện Flutter theo đúng mã nguồn trong <code>lib/main.dart</code></p>
+  </header>
+
+  <div class="container">
+    <!-- Phone Mockup Device -->
+    <div class="device-wrapper">
+      <div class="phone-frame">
+        <div class="island-notch"></div>
+        <div class="phone-screen">
+          <!-- Status Bar -->
+          <div class="status-bar">
+            <span id="clock">9:41</span>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+              <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><rect x="1" y="2" width="19" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="4" width="12" height="8" rx="1"/><rect x="21" y="6" width="2" height="4" rx="1"/></svg>
+            </div>
+          </div>
+
+          <!-- Flutter AppBar -->
+          <div class="flutter-appbar">
+            <h2>I Am Rich</h2>
+          </div>
+
+          <!-- Flutter Body -->
+          <div class="flutter-body">
+            <div class="diamond-image-container">
+              <div class="diamond-glow"></div>
+              <img src="images/diamond.png" alt="Diamond" class="diamond-img" id="diamondImage">
+            </div>
+          </div>
+
+          <!-- Home Indicator -->
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center;">
+        📱 Giao diện rendered trực tiếp từ <code>images/diamond.png</code>
+      </p>
+    </div>
+
+    <!-- Details and Source Code -->
+    <div class="side-panel">
+      <!-- Status Notice -->
+      <div class="notice">
+        <strong>💡 Trạng thái hệ thống:</strong> Máy tính hiện chưa cài đặt Flutter SDK CLI (đường dẫn <code>flutter</code> chưa có trong PATH). Trang xem trước (Live Preview) này dựng lại 100% chính xác giao diện Widget Flutter của Lab 1.
+      </div>
+
+      <!-- Source Code Card -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          Mã nguồn <code>lib/main.dart</code>
+        </div>
+        <div class="code-box">
+<span class="keyword">import</span> <span class="string">'package:flutter/material.dart'</span>;
+
+<span class="keyword">void</span> main() {
+  runApp(
+    <span class="type">MaterialApp</span>(
+      <span class="property">home</span>: <span class="type">Scaffold</span>(
+        <span class="property">backgroundColor</span>: Colors.blueGrey[<span class="string">900</span>],
+        <span class="property">appBar</span>: <span class="type">AppBar</span>(
+          <span class="property">title</span>: <span class="type">Text</span>(<span class="string">'I Am Rich'</span>),
+          <span class="property">backgroundColor</span>: Colors.blueGrey[<span class="string">900</span>],
+        ),
+        <span class="property">body</span>: <span class="type">Center</span>(
+          <span class="property">child</span>: <span class="type">Image</span>(
+            <span class="comment">// Đảm bảo bạn đã thêm file ảnh vào thư mục assets và khai báo trong pubspec.yaml</span>
+            <span class="property">image</span>: <span class="type">AssetImage</span>(<span class="string">'images/diamond.png'</span>),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+        </div>
+
+        <div class="btn-group">
+          <a href="https://drive.google.com/drive/folders/1UBh2U8VFRncAii6maSeu5WAtWJS6fuCW?usp=sharing" target="_blank" class="btn btn-primary">
+            🎬 Xem Video Demo Thực Tế
+          </a>
+          <a href="https://github.com/duongmoiii/lab1" target="_blank" class="btn btn-secondary">
+            🔗 Repo Gốc Lab 1
+          </a>
+          <a href="https://github.com/truongthanhmoney5-blip/mobile-dev-9labs/tree/main/lab1" target="_blank" class="btn btn-secondary">
+            📦 Lab 1 trên GitHub của bạn
+          </a>
+        </div>
+      </div>
+
+      <!-- How to Run Locally with Flutter -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Cách chạy trực tiếp bằng Flutter CLI trên máy
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
+          Để chạy bằng lệnh <code>flutter run</code>:
+        </p>
+        <ol style="font-size: 0.88rem; color: #cfd8dc; padding-left: 20px; line-height: 1.8;">
+          <li>Tải Flutter SDK từ <a href="https://docs.flutter.dev/get-started/install/windows/mobile" target="_blank" style="color: #64b5f6;">flutter.dev</a> và giải nén (khuyên đặt vào <code>D:\flutter</code> vì ổ C: chỉ còn ~3.7 GB).</li>
+          <li>Thêm <code>D:\flutter\bin</code> vào biến môi trường <strong>PATH</strong>.</li>
+          <li>Mở terminal tại thư mục bài lab:
+            <div style="background: #0d1117; padding: 6px 10px; border-radius: 6px; margin: 4px 0; font-family: monospace;">
+              cd d:\DANENTANG\lab1<br>
+              flutter run
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Live Clock in status bar
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
