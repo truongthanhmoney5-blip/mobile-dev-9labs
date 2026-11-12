@@ -1,24 +1,28 @@
+import 'package:bmical/constants.dart';
 import 'package:flutter/material.dart';
 
 class RoundIconButton extends StatelessWidget {
   const RoundIconButton({
     required this.icon,
+    required this.tooltip,
     required this.onPressed,
     super.key,
   });
 
   final IconData icon;
-  final VoidCallback onPressed;
+  final String tooltip;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return RawMaterialButton(
+    return IconButton.filledTonal(
+      tooltip: tooltip,
       onPressed: onPressed,
-      elevation: 0.0,
-      fillColor: const Color(0xFF4C4F5E),
-      shape: const CircleBorder(),
-      constraints: const BoxConstraints.tightFor(width: 56.0, height: 56.0),
-      child: Icon(icon),
+      style: IconButton.styleFrom(
+        foregroundColor: kAccent,
+        backgroundColor: const Color(0xFFE3F0ED),
+      ),
+      icon: Icon(icon, size: 20),
     );
   }
 }

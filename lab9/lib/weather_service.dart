@@ -1,35 +1,31 @@
 import 'dart:convert';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:clima/weather_model.dart';
+import 'package:http/http.dart' as http;
 
 class WeatherService {
-  final String apiKey;
-  WeatherService({required this.apiKey});
-  static const String _baseUrl =
-      'https://api.openweathermap.org/data/2.5/weather';
+  const WeatherService({http.Client? client}) : _client = client;
 
-  Future<Weather> getWeatherByCoordinates(double lat, double lon) async {
-    final Uri url = Uri.parse(
-      '$_baseUrl?lat=16.064246759875463&lon=108.21899248902092&apiKey=$apiKey&units=metric',
+  final http.Client? _client;
+
+  Future<Weather> getDaNangWeather() async {
+    final uri = Uri.https('api.open-meteo.com', '/v1/forecast', {
+      'latitude': '16.0642',
+      'longitude': '108.2190',
+      'current': 'temperature_2m,weather_code',
+      'temperature_unit': 'celsius',
+    });
+    final response = await (_client?.get(uri) ?? http.get(uri)).timeout(
+      const Duration(seconds: 10),
     );
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      return Weather.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load weather data');
+    if (response.statusCode != 200) {
+      throw http.ClientException(
+        'Weather API returned ${response.statusCode}',
+        uri,
+      );
     }
-  }
 
-  //get coordinates
-  Future<Position> getCurrentPosition() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.deniedForever) {
-      throw Exception('Location permissions are permanently denied');
-    }
-    return await Geolocator.getCurrentPosition();
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return Weather.fromJson(data);
   }
 }

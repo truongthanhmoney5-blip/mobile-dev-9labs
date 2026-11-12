@@ -1,30 +1,40 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:eight_ball/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:eight_ball/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const BallPage());
+  for (final width in [320.0, 1024.0]) {
+    testWidgets('Shows and changes the answer at width $width', (tester) async {
+      await tester.binding.setSurfaceSize(Size(width, 640));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      await tester.pumpWidget(const EightBallApp());
+      expect(find.text('Đang chờ câu hỏi'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      final askButton = find.widgetWithText(FilledButton, 'Xem câu trả lời');
+      await tester.ensureVisible(askButton);
+      await tester.tap(askButton);
+      await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+      BallAnswer currentAnswer() => BallAnswer.values.singleWhere(
+            (answer) => find.text(answer.label).evaluate().isNotEmpty,
+          );
+
+      final firstAnswer = currentAnswer();
+      expect(find.image(AssetImage(firstAnswer.imagePath)), findsOneWidget);
+
+      final ball = find.widgetWithImage(
+        TextButton,
+        AssetImage(firstAnswer.imagePath),
+      );
+      await tester.ensureVisible(ball);
+      await tester.tap(ball);
+      await tester.pumpAndSettle();
+
+      final nextAnswer = currentAnswer();
+      expect(nextAnswer, isNot(firstAnswer));
+      expect(find.image(AssetImage(nextAnswer.imagePath)), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

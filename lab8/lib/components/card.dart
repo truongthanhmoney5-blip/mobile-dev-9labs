@@ -1,29 +1,21 @@
+import 'package:bmical/constants.dart';
 import 'package:flutter/material.dart';
 
 class CardContainer extends StatelessWidget {
-  const CardContainer({
-    required this.colour,
-    this.cardChild,
-    this.onPress,
-    super.key,
-  });
+  const CardContainer({required this.child, super.key});
 
-  final Color colour;
-  final Widget? cardChild;
-  final VoidCallback? onPress;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPress,
-      child: Container(
-        margin: const EdgeInsets.all(15.0),
-        decoration: BoxDecoration(
-          color: colour,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: cardChild,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: kBorder),
+        borderRadius: BorderRadius.circular(20),
       ),
+      child: child,
     );
   }
 }

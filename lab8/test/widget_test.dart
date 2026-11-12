@@ -1,30 +1,35 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:bmical/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:bmical/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(BMICalculator());
+  for (final width in [320.0, 1024.0]) {
+    testWidgets('Calculates BMI and retains inputs at width $width', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(Size(width, 600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(const BMICalculator());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      final increase = find.byTooltip('Tăng cân nặng');
+      await tester.ensureVisible(increase);
+      await tester.tap(increase);
+      await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      final calculate = find.text('Tính chỉ số BMI');
+      await tester.ensureVisible(calculate);
+      await tester.tap(calculate);
+      await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+      expect(find.text('18.8'), findsOneWidget);
+      expect(find.text('Bình thường'), findsOneWidget);
+      expect(find.text('180 cm · 61 kg'), findsOneWidget);
+
+      await tester.tap(find.text('Sửa số đo'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tính BMI'), findsOneWidget);
+      expect(find.text('61 kg', findRichText: true), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

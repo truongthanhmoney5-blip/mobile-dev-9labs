@@ -1,30 +1,45 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:bossleveldestini/brain.dart';
+import 'package:bossleveldestini/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:bossleveldestini/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MainApp());
+  for (final width in [320.0, 1024.0]) {
+    testWidgets('Shows all endings and restarts at width $width', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(Size(width, 600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(const MainApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      for (final path in [
+        [1, 1],
+        [1, 2],
+        [2, 2],
+        [2, 1, 1],
+      ]) {
+        final story = StoryBrain();
+        expect(find.text(story.getStory()), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+        for (final choice in path) {
+          final label = choice == 1 ? story.getchoose1() : story.getchoose2();
+          final button = find.widgetWithText(OutlinedButton, label);
+          await tester.ensureVisible(button);
+          await tester.tap(button);
+          await tester.pumpAndSettle();
+          story.nextStory(choice);
+          expect(find.text(story.getStory()), findsOneWidget);
+        }
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+        expect(find.byType(OutlinedButton), findsOneWidget);
+        final replay = find.widgetWithText(OutlinedButton, 'Chơi lại');
+        await tester.ensureVisible(replay);
+        await tester.tap(replay);
+        await tester.pumpAndSettle();
+      }
+
+      expect(find.text(StoryBrain().getStory()), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

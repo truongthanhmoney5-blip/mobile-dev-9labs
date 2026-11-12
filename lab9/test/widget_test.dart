@@ -1,30 +1,43 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:clima/theme_provider.dart';
+import 'package:clima/weather_screen.dart';
+import 'package:clima/weather_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:clima/main.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Shows Da Nang weather in the original layout', (tester) async {
+    final client = MockClient((request) async {
+      expect(request.url.host, 'api.open-meteo.com');
+      expect(request.url.queryParameters['latitude'], '16.0642');
+      expect(request.url.queryParameters['longitude'], '108.2190');
+      return http.Response(
+        '{"current":{"temperature_2m":28.4,"weather_code":3}}',
+        200,
+      );
+    });
+    addTearDown(client.close);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => ThemeProvider(),
+        child: MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: WeatherScreen(
+              weatherService: WeatherService(client: client),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('MINI WEATHER'), findsOneWidget);
+    expect(find.text('ĐÀ NẴNG'), findsOneWidget);
+    expect(find.text('28°C'), findsOneWidget);
+    expect(find.text('Clouds'), findsOneWidget);
+    expect(find.byType(Switch), findsOneWidget);
   });
 }
